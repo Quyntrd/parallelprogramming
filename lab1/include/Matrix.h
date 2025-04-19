@@ -9,15 +9,15 @@ using namespace std;
 class Matrix {
 	unsigned int _rows;
 	unsigned int _cols;
-	vector<vector<float>> _data;
+	vector<vector<int>> _data;
 public:
 	Matrix();
 	Matrix(unsigned int rows, unsigned int cols);
-	Matrix(unsigned int rows, unsigned int cols, const float lower, const float upper);
+	Matrix(unsigned int rows, unsigned int cols, const int lower, const int upper);
 	Matrix operator*(const Matrix& other) const;
 
-	const vector<vector<float>>& Data() const { return _data; }
-	vector<vector<float>>& Data() { return _data; }
+	const vector<vector<int>>& Data() const { return _data; }
+	vector<vector<int>>& Data() { return _data; }
 
 	void ReadData(const string& filename);
 	void WriteData(const string& filename) const;
@@ -35,23 +35,23 @@ public:
 };
 
 Matrix::Matrix() : _rows(0), _cols(0) {
-	_data.resize(_rows, vector<float>(_cols, 0.0));
+	_data.resize(_rows, vector<int>(_cols, 0));
 }
 
 Matrix::Matrix(unsigned int rows, unsigned int cols) : _rows(rows), _cols(cols) {
-	_data.resize(_rows, vector<float>(_cols, 0.0));
+	_data.resize(_rows, vector<int>(_cols, 0));
 }
 
-Matrix::Matrix(unsigned int rows, unsigned int cols, const float lower, const float upper) {
+Matrix::Matrix(unsigned int rows, unsigned int cols, const int lower, const int upper) {
 	_rows = rows;
 	_cols = cols;
-	_data.resize(_rows, vector<float>(_cols));
+	_data.resize(_rows, vector<int>(_cols));
 
 	srand(static_cast<unsigned>(time(nullptr)));
 
 	for (unsigned int i = 0; i < _rows; ++i) {
 		for (unsigned int j = 0; j < _cols; ++j) {
-			_data[i][j] = lower + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX) / (upper - lower));
+			_data[i][j] = lower + static_cast<int>(rand()) / (static_cast<float>(RAND_MAX) / (upper - lower));
 		}
 	}
 }
@@ -68,7 +68,7 @@ void Matrix::ReadData(const string& filename) {
 		return;
 	}
 
-	_data.assign(_rows, vector<float>(_cols));
+	_data.assign(_rows, vector<int>(_cols));
 
 	for (unsigned int i = 0; i < _rows; i++) {
 		for (unsigned int j = 0; j < _cols; j++)
