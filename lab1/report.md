@@ -16,13 +16,13 @@
 4. Результат записывается в файл `сN.txt`.
 5. Среднее время выполнения рассчитывается по 10 запускам для каждой размерности (итого 100 перемножений).
 6. Верификация результатов выполняется с использованием Python и библиотеки `numpy`, где сравниваются файлы `сN.txt` с результатами, полученными через `numpy.dot()`.
-![Рисунок 1, Верификация матриц](https://github.com/Quyntrd/parallelprogramming/blob/main/lab_1/Verify_Test.png)
+![Рисунок 1, Верификация матриц](https://github.com/Quyntrd/parallelprogramming/blob/main/lab1/Verify_Test.png)
 
 ## Результат
 Программа была протестирована с использованием CMake в двух версиях Debug-x64 и Release-x64
 Полученные средние времена выполнения перемножения матриц были визуализированы. График зависимости времени выполнения от размерности матрицы:
 
-![График 1, Debug-x64](https://github.com/Quyntrd/parallelprogramming/blob/main/lab_1/Graph_1.png)
-![График 2, Release-x64](https://github.com/Quyntrd/parallelprogramming/blob/main/lab_1/Graph_2.png)
+![График 1, Debug-x64](https://github.com/Quyntrd/parallelprogramming/blob/main/lab1/Graph_1.png)
+![График 2, Release-x64](https://github.com/Quyntrd/parallelprogramming/blob/main/lab1/Graph_2.png)
 ## Вывод
 Алгоритм умножения матриц имеет сложность *O(n^3)*, что подтверждается графиком зависимости времени выполнения от размерности матрицы. Используемый метод обычного перемножения демонстрирует ожидаемый рост времени выполнения при увеличении размерности матриц. Также время выполнения и умножения зависит от способа сборки. В Debug версии компилятор не оптимизирует работу программы.
