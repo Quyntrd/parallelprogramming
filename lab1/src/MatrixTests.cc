@@ -20,7 +20,7 @@ int main() {
             Matrix a(i, i, 2, 100);
             Matrix b(i, i, 2, 100);
 
-            string path = "C:/Users/ROfl/Desktop/parallelprogramming/lab1/tests/";
+            string path = "C:/Users/Quyntrd/Desktop/parallel/parallelprogramming/lab1/tests/";
             a.WriteData(format("{}a{}.txt", path, i));
             b.WriteData(format("{}b{}.txt", path, i));
 

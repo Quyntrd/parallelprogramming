@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <omp.h>
 #include <fstream>
 
 using namespace std;
@@ -92,11 +93,11 @@ void Matrix::WriteData(const string& filename) const {
 	}
 }
 Matrix Matrix::operator*(const Matrix& other) const {
-	Matrix result(_rows, other._cols);
-
-	for (unsigned int i = 0; i < _rows; ++i) {
-		for (unsigned int j = 0; j < other._cols; ++j) {
-			for (unsigned int k = 0; k < _cols; ++k) {
+	Matrix result(_rows, other._cols);  
+	#pragma omp parallel for schedule(static)
+	for (int i = 0; i < _rows; ++i) {
+		for (int j = 0; j < other._cols; ++j) {
+			for (int k = 0; k < _cols; ++k) {
 				result._data[i][j] += _data[i][k] * other._data[k][j];
 			}
 		}
