@@ -21,8 +21,8 @@
 
 Время с технологией OpenMP
 
-![График 3, Debug-x64](https://github.com/Quyntrd/parallelprogramming/blob/main/lab2/Graph_1.png)
+![График 3, Debug-x64](https://github.com/Quyntrd/parallelprogramming/blob/lab2/lab2/Graph_1.png)
 
-![График 4, Release-x64](https://github.com/Quyntrd/parallelprogramming/blob/main/lab2/Graph_2.png)
+![График 4, Release-x64](https://github.com/Quyntrd/parallelprogramming/blob/lab2/lab2/Graph_2.png)
 ## Вывод
 Использование OpenMP в разы улучшило скорость выполнения программы. Время умножения уменьшилось в 2-4 раза. 
