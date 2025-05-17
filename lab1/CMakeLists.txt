@@ -1,21 +1,27 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(Matrix CXX)
+project(Matrix LANGUAGES CXX CUDA)
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CUDA_STANDARD 11)
 
-if(MSVC)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS true)
-    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-        string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-    endif()
-    set(CMAKE_CXX_FLAGS " /Ob0 ${CMAKE_CXX_FLAGS} ")
-endif()
+add_library(Matrix SHARED
+    include/Matrix.h
+    src/Matrix.cu
+)
 
-add_library(Matrix SHARED "include/Matrix.h" "src/Matrix.cc")
-target_include_directories(Matrix PUBLIC "include")
+target_include_directories(Matrix PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
 
-add_executable(MatrixExe "src/MatrixTests.cc")
-target_link_libraries(MatrixExe Matrix)
+set_target_properties(Matrix PROPERTIES
+    CUDA_SEPARABLE_COMPILATION ON
+)
+
+add_executable(MatrixExe
+    src/MatrixTests.cc
+)
+
+set_source_files_properties(src/MatrixTests.cc PROPERTIES LANGUAGE CUDA)
+
+target_link_libraries(MatrixExe PRIVATE Matrix)
