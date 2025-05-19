@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <vector>
 #include <fstream>
+#include <mpi.h>
 
 using namespace std;
 
@@ -92,15 +93,83 @@ void Matrix::WriteData(const string& filename) const {
 	}
 }
 Matrix Matrix::operator*(const Matrix& other) const {
-	Matrix result(_rows, other._cols);
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-	for (unsigned int i = 0; i < _rows; ++i) {
-		for (unsigned int j = 0; j < other._cols; ++j) {
-			for (unsigned int k = 0; k < _cols; ++k) {
-				result._data[i][j] += _data[i][k] * other._data[k][j];
-			}
-		}
-	}
-	return result;
+    int rowsA, colsA, rowsB, colsB;
+    if (rank == 0) {
+        rowsA = _rows;
+        colsA = _cols;
+        rowsB = other._rows;
+        colsB = other._cols;
+    }
+    MPI_Bcast(&rowsA, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&colsA, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&rowsB, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&colsB, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
+    if (colsA != rowsB) {
+        if (rank == 0) cerr << "Dimension mismatch for multiplication" << endl;
+        return Matrix();
+    }
+
+    int baseRows = rowsA / size;
+    int rem = rowsA % size;
+    vector<int> counts(size), displs(size);
+    for (int i = 0; i < size; ++i) {
+        int chunk = baseRows + (i < rem ? 1 : 0);
+        counts[i] = chunk * colsA;
+        displs[i] = (i == 0 ? 0 : displs[i - 1] + counts[i - 1]);
+    }
+    int localRows = counts[rank] / colsA;
+
+    vector<float> flatA;
+    if (rank == 0) {
+        flatA.resize(rowsA * colsA);
+        for (int i = 0; i < rowsA; ++i)
+            copy(_data[i].begin(), _data[i].end(), flatA.begin() + i * colsA);
+    }
+    vector<float> localA(localRows * colsA);
+    MPI_Scatterv(flatA.data(), counts.data(), displs.data(), MPI_FLOAT,
+        localA.data(), counts[rank], MPI_FLOAT, 0, MPI_COMM_WORLD);
+
+    vector<float> flatB(rowsB * colsB);
+    if (rank == 0) {
+        for (int i = 0; i < rowsB; ++i)
+            copy(other._data[i].begin(), other._data[i].end(), flatB.begin() + i * colsB);
+    }
+    MPI_Bcast(flatB.data(), rowsB * colsB, MPI_FLOAT, 0, MPI_COMM_WORLD);
+
+    vector<float> localC(localRows * colsB, 0.0f);
+    for (int i = 0; i < localRows; ++i) {
+        for (int j = 0; j < colsB; ++j) {
+            float sum = 0.0f;
+            for (int k = 0; k < colsA; ++k)
+                sum += localA[i * colsA + k] * flatB[k * colsB + j];
+            localC[i * colsB + j] = sum;
+        }
+    }
+
+    vector<int> recvCounts(size), recvDispls(size);
+    for (int i = 0; i < size; ++i) {
+        int rows = counts[i] / colsA;
+        recvCounts[i] = rows * colsB;
+        recvDispls[i] = (i == 0 ? 0 : recvDispls[i - 1] + recvCounts[i - 1]);
+    }
+    vector<float> flatResult;
+    if (rank == 0) flatResult.resize(rowsA * colsB);
+    MPI_Gatherv(localC.data(), recvCounts[rank], MPI_FLOAT,
+        flatResult.data(), recvCounts.data(), recvDispls.data(), MPI_FLOAT,
+        0, MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        Matrix result(rowsA, colsB);
+        for (int i = 0; i < rowsA; ++i)
+            copy(flatResult.begin() + i * colsB,
+                flatResult.begin() + (i + 1) * colsB,
+                result._data[i].begin());
+        return result;
+    }
+    return Matrix();
 }

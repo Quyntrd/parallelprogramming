@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 
 if(MSVC)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS true)
+
     if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
         string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     else()
@@ -14,8 +15,13 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS " /Ob0 ${CMAKE_CXX_FLAGS} ")
 endif()
 
+find_package(MPI REQUIRED)
+
 add_library(Matrix SHARED "include/Matrix.h" "src/Matrix.cc")
 target_include_directories(Matrix PUBLIC "include")
 
+target_link_libraries(Matrix PRIVATE MPI::MPI_CXX)
+
 add_executable(MatrixExe "src/MatrixTests.cc")
 target_link_libraries(MatrixExe Matrix)
+target_link_libraries(MatrixExe MPI::MPI_CXX)
